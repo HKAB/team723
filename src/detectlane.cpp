@@ -68,7 +68,7 @@ void DetectLane::update(const Mat &src)
     //     }
     // }
 
-    // imshow("Debug", birdView);
+    imshow("Debug", birdView);
 
     for (int i = 1; i < leftLane.size(); i++)
     {
@@ -85,7 +85,7 @@ void DetectLane::update(const Mat &src)
         }
     }
 
-    // imshow("Lane Detect", lane);
+    imshow("Lane Detect", lane);
 }
 
 Mat DetectLane::preProcess(const Mat &src)
@@ -100,11 +100,11 @@ Mat DetectLane::preProcess(const Mat &src)
 
     dst = birdViewTranform(imgThresholded);
 
-    // imshow("Bird View", dst);
+    imshow("Bird View", dst);
 
     fillLane(dst);
 
-    // imshow("Binary", imgThresholded);
+    imshow("Binary", imgThresholded);
 
     return dst;
 }

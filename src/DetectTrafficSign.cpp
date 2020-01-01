@@ -1,5 +1,6 @@
 #include "DetectTrafficSign.h"
 #include <chrono>
+#include <ros/ros.h>
 
 DetectTrafficSign::DetectTrafficSign()
 {
@@ -184,12 +185,14 @@ Mat DetectTrafficSign::objElimination(Mat &cleanedImage)
     
     for (size_t i = 0; i < contours.size(); i++)
     {
+        // char a[100] = doubleToString(boundRect[i].width/boundRect[i].height);
+        // ROS_INFO("ratio: %lf\n", boundRect[i].width/(boundRect[i].height*1.0));
+        // ROS_INFO("\n");
         if (contourArea(contours[i]) < cleanedImage.cols*cleanedImage.rows/500 || 
-            contourArea(contours[i]) > cleanedImage.cols*cleanedImage.rows/100 ||
-            (boundRect[i].width/boundRect[i].height < 0.8 || boundRect[i].width/boundRect[i].height > 1.2) ||
-            (contourArea(contours[i])/(boundRect[i].width*boundRect[i].height) < 0.6))
+            (boundRect[i].width/(boundRect[i].height*1.0) < 0.6 || boundRect[i].width/(boundRect[i].height*1.0) > 1.5))
+            // (contourArea(contours[i])/(boundRect[i].width*boundRect[i].height) < 0.6))
             {
-                rectangle(cleanedImage, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 0, 255), 2);
+                // rectangle(cleanedImage, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 0, 255), 2);
                 drawContours( cleanedImage, contours, i, Scalar(0, 0, 0), -1, 8, hierarchy, 0, Point() );
             }
     }
@@ -203,18 +206,23 @@ vector<Point> DetectTrafficSign::contourExtraction(Mat contour_filled_pic)
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
 
-    Mat contour_filled_pic_gray(contour_filled_pic.rows, contour_filled_pic.cols, CV_8UC1);
-    // cvtColor(contour_filled_pic, contour_filled_pic_gray, CV_BGR2GRAY);
-    findContours(contour_filled_pic_gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    Mat contour_filled_pic_gray;
+    Mat contour_filled_pic_gray_th;
+    
+    cvtColor(contour_filled_pic, contour_filled_pic_gray, CV_BGR2GRAY);
+    threshold(contour_filled_pic_gray, contour_filled_pic_gray_th, 0, 255, THRESH_BINARY);
+    // imshow("contour_filled_pic_gray_th", contour_filled_pic_gray_th);
+
+    findContours(contour_filled_pic_gray_th, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
     vector<int> hull_index(contours.size());
     vector<Point> hull_point;
     vector<int> contour_add_index;
     vector<Point> hull;
     // Mat hull_pic(rgb_image.rows, rgb_image.cols, CV_8UC3);
-    cv::Mat hull_pic(contour_filled_pic.rows, contour_filled_pic.cols, CV_BGR2GRAY);
+    // cv::Mat hull_pic(contour_filled_pic.rows, contour_filled_pic.cols, CV_BGR2GRAY);
 
     int maxAreaIndex;
-    double maxArea;
+    double maxArea = -100;
     if (contours.size() < 1) return hull;
     for (size_t i = 0; i < contours.size(); i++)
     {
@@ -249,28 +257,30 @@ vector<Point> DetectTrafficSign::contourExtraction(Mat contour_filled_pic)
     }
     
     vector<Point> hull_point_sorted;
-    convexHull(hull_point, hull, true);
+    convexHull(hull_point, hull_point_sorted, true);
+    // for (size_t i = 0; i < hull.size(); i++)
+    //     {
+    //      drawContours(hull_pic, hull, i, Scalar(255, 255, 255), 1);
+    //      Moments mu = moments(hull[i]);
+    //      circle(rgb_image, Point2f(mu.m10/mu.m00 , mu.m01/mu.m00), sqrtf(mu.m00/M_PI), Scalar(0, 0, 255));
+    //     }
 
-    return hull;
 
-        // for (size_t i = 0; i < hull.size(); i++)
-        // {
-        //  drawContours(hull_pic, hull, i, Scalar(255, 255, 255), 1);
-        //  Moments mu = moments(hull[i]);
-        //  circle(rgb_image, Point2f(mu.m10/mu.m00 , mu.m01/mu.m00), sqrtf(mu.m00/M_PI), Scalar(0, 0, 255));
-        // }
+    return hull_point_sorted;
+
+        
 }
 
 Mat DetectTrafficSign::detectSign(vector<Point> hull, Mat &pic_to_draw)
 {
-    Mat sign_mask(pic_to_draw.rows, pic_to_draw.cols, CV_8UC1);
-        // drawContours(hull_pic, hull, i, Scalar(255, 255, 255), 1);
+    Mat mask(pic_to_draw.rows, pic_to_draw.cols, CV_8UC1);
+    // drawContours(hull_pic, hull, i, Scalar(255, 255, 255), 1);
     Moments mu = moments(hull);
     circle(pic_to_draw, Point2f(mu.m10/mu.m00 , mu.m01/mu.m00), sqrtf(mu.m00/M_PI), Scalar(0, 0, 255));
-    circle(sign_mask, Point2f(mu.m10/mu.m00 , mu.m01/mu.m00), sqrtf(mu.m00/M_PI), Scalar(255, 255, 255), -1);
+    // circle(sign_mask, Point2f(mu.m10/mu.m00 , mu.m01/mu.m00), sqrtf(mu.m00/M_PI), Scalar(255, 255, 255), -1);
 
-    // imshow("sign mask", sign_mask);
-    return sign_mask;
+    // imshow("mask", mask);
+    // return mask;
 }
 
 Mat DetectTrafficSign::rgb_to_ihls(Mat rgb_image)
@@ -298,20 +308,19 @@ void DetectTrafficSign::detect(Mat rgb_image)
     Mat hsv_image(rgb_image.rows, rgb_image.cols, CV_8UC3);
     Mat hsv_range_image(rgb_image.rows, rgb_image.cols, CV_8UC3);
     cvtColor(rgb_image, hsv_image, CV_BGR2HSV);
-	inRange(hsv_image, Scalar(100, 100, 40), Scalar(110, 140, 50), hsv_range_image);
+	inRange(hsv_image, Scalar(90, 80, 30), Scalar(110, 140, 80), hsv_range_image);
+    Mat cleaned_image = cleanImageOps(hsv_range_image);
 
-    // Mat ihls_image = rgb_to_ihls(rgb_image);
-    // Mat nhs_image = blue_nhs(ihls_image);
-    // Mat cleaned_image = cleanImageOps(nhs_image);
+    Mat obj_elimination_pic = objElimination(cleaned_image);
 
-    // Mat obj_elimination_pic = objElimination(cleaned_image);
-
-    // vector<Point> hull = contourExtraction(obj_elimination_pic);
-    // if (hull.size() < 1)
-    //     cout << "not found!!";
-    // else
-    // {
-    //     detectSign(hull, rgb_image);        
-    // }
-    // imshow("hsv_range_image", hsv_range_image);
+    vector<Point> hull = contourExtraction(cleaned_image);
+    if (hull.size() < 1)
+        // cout << "not found!!";
+    else
+    {
+        detectSign(hull, rgb_image);        
+    }
+    imshow("rgb_image", rgb_image);
+    // imshow("cleaned_image", cleaned_image);
+    // imshow("obj_elimination_pic", obj_elimination_pic);
 }
