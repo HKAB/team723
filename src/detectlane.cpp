@@ -13,16 +13,16 @@ int DetectLane::HORIZONTAL = 1;
 Point DetectLane::null = Point();
 
 DetectLane::DetectLane() {
-    cvCreateTrackbar("LowH", "Threshold", &minThreshold[0], 179);
-    cvCreateTrackbar("HighH", "Threshold", &maxThreshold[0], 179);
+    // cvCreateTrackbar("LowH", "Threshold", &minThreshold[0], 179);
+    // cvCreateTrackbar("HighH", "Threshold", &maxThreshold[0], 179);
 
-    cvCreateTrackbar("LowS", "Threshold", &minThreshold[1], 255);
-    cvCreateTrackbar("HighS", "Threshold", &maxThreshold[1], 255);
+    // cvCreateTrackbar("LowS", "Threshold", &minThreshold[1], 255);
+    // cvCreateTrackbar("HighS", "Threshold", &maxThreshold[1], 255);
 
-    cvCreateTrackbar("LowV", "Threshold", &minThreshold[2], 255);
-    cvCreateTrackbar("HighV", "Threshold", &maxThreshold[2], 255);
+    // cvCreateTrackbar("LowV", "Threshold", &minThreshold[2], 255);
+    // cvCreateTrackbar("HighV", "Threshold", &maxThreshold[2], 255);
 
-    cvCreateTrackbar("Shadow Param", "Threshold", &shadowParam, 255);
+    // cvCreateTrackbar("Shadow Param", "Threshold", &shadowParam, 255);
 }
 
 DetectLane::~DetectLane(){}
@@ -85,7 +85,7 @@ void DetectLane::update(const Mat &src)
         }
     }
 
-    imshow("Lane Detect", lane);
+    // imshow("Lane Detect", lane);
 }
 
 Mat DetectLane::preProcess(const Mat &src)
@@ -100,11 +100,11 @@ Mat DetectLane::preProcess(const Mat &src)
 
     dst = birdViewTranform(imgThresholded);
 
-    imshow("Bird View", dst);
+    // imshow("Bird View", dst);
 
     fillLane(dst);
 
-    imshow("Binary", imgThresholded);
+    // imshow("Binary", imgThresholded);
 
     return dst;
 }

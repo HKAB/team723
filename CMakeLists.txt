@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(lane_detect)
+project(team723)
 
 add_compile_options(-std=c++11)
 
@@ -31,12 +31,12 @@ add_library(api_lane_detection
   src/carcontrol.cpp
 )
 
-add_executable(lane_detect src/main.cpp)
+add_executable(team723 src/main.cpp)
 
-add_dependencies(lane_detect ${catkin_EXPORTED_TARGETS})
+add_dependencies(team723 ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(
-  lane_detect
+  team723
   api_lane_detection
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
