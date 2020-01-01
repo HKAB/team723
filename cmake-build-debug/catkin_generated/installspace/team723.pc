@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: team723
+Description: Description of team723
+Version: 0.0.0
+Cflags: -I/usr/local/include
+Libs: -L/usr/local/lib -lapi_lane_detection
+Requires: roscpp

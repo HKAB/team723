@@ -1,0 +1,8 @@
+prefix=/home/mar/catkin_ws/src/team723/cmake-build-debug/devel
+
+Name: team723
+Description: Description of team723
+Version: 0.0.0
+Cflags: -I/home/mar/catkin_ws/src/team723/include
+Libs: -L/home/mar/catkin_ws/src/team723/cmake-build-debug/devel/lib -lapi_lane_detection
+Requires: roscpp

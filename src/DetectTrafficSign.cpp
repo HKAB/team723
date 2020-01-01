@@ -314,13 +314,11 @@ void DetectTrafficSign::detect(Mat rgb_image)
     Mat obj_elimination_pic = objElimination(cleaned_image);
 
     vector<Point> hull = contourExtraction(cleaned_image);
-    if (hull.size() < 1)
-        // cout << "not found!!";
-    else
+    if (hull.size() > 0)
     {
         detectSign(hull, rgb_image);        
     }
-    imshow("rgb_image", rgb_image);
+    //imshow("rgb_image", rgb_image);
     // imshow("cleaned_image", cleaned_image);
     // imshow("obj_elimination_pic", obj_elimination_pic);
 }
